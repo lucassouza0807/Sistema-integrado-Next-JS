@@ -1,15 +1,12 @@
 import { useState, useEffect, useRef, useContext } from "react";
 import { useRouter } from "next/router";
-import { UserContext, UserContextType } from "./contexts/UserProvider";
 
 export default function Login(props: any) {
   const emailRef: any = useRef("");
   const passwordRef: any = useRef("");
+  const error_div: any = useRef();//
 
-  const [validationError, setValidationError]: any = useState();
-  const [errorContainer, setErrorContainer]: any = useState("hidden");
-
-  const { user, setUser } = useContext<UserContextType>(UserContext);
+  const [validationError, setValidationError]: any = useState([]);
 
   const router = useRouter();
 
@@ -32,41 +29,26 @@ export default function Login(props: any) {
     });
 
     const response_body = await response.json();
-    console.log(response_body);
-    response_body.success === true
-      ? window.localStorage.setItem(
-          "user",
-          JSON.stringify({
-            usuario_id: response_body.cliente_id,
-            user_name: response_body.cliente_nome,
-            session_token: response_body.token
-          })
-        )
-      : setValidationError((prevState: any) => response_body);
 
-    if (response_body.success == true) {
-      setUser({ isLogged: true}) 
-      router.push("/dashboard");
+    if (response_body.success == false) {
+      error_div.current.style.display = "flex";
+      setValidationError((prevState: any) => response_body.message);
+      return router.push("/login");
     }
   }
-
-  console.log(user);
-
-  useEffect(() => {
-    validationError ? setErrorContainer("block") : setErrorContainer("hidden");
-  }, [validationError]);
 
   return (
     <div className="container relative flex flex-col items-center h-[100vh]">
       <div className="relative flex flex-col items-center top-[100px]">
         <div
-          className={`${errorContainer} border-2 duration-75 border-black bg-slate-100 rounded-md flex items-center w-[400px] text-center justify-center h-[120px]`}
+          className={`hidden border-2 duration-75 border-black bg-slate-100 rounded-md flex items-center w-[400px] text-center justify-center h-[120px]`}
+          ref={error_div}
         >
           {validationError && (
-            <p className="font-bold text-md"> {validationError.message}</p>
+            <p className="font-bold text-md"> {validationError}</p>
           )}
         </div>
-        <h1 className="font-bold text-[2rem]">MEU & OVO</h1>
+        <h1 className="font-bold text-[2rem]">LOGIN</h1>
       </div>
       <form onSubmit={handleSubmit}>
         <div className="w-[400px] h-[500px] flex flex-col justify-center">
