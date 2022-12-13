@@ -1,10 +1,14 @@
 import { useState, useEffect, useRef, useContext } from "react";
 import { useRouter } from "next/router";
+import { UserContext } from "../src/contexts/UserContext";
+import { setCookie, parseCookies } from "nookies";
 
 export default function Login(props: any) {
   const emailRef: any = useRef("");
   const passwordRef: any = useRef("");
-  const error_div: any = useRef();//
+  const error_div: any = useRef(); //
+
+  const { setUser }: any = useContext(UserContext);
 
   const [validationError, setValidationError]: any = useState([]);
 
@@ -24,7 +28,7 @@ export default function Login(props: any) {
       }),
       headers: {
         "Content-Type": "application/json",
-        api_secret: props.env_api_secret,
+        api_secret: process.env.NEXT_PUBLIC_API_SECRET,
       },
     });
 
@@ -35,8 +39,28 @@ export default function Login(props: any) {
       setValidationError((prevState: any) => response_body.message);
       return router.push("/login");
     }
-  }
 
+    setUser({
+      isLogged: true,
+      user: response_body.user,
+    });
+
+    
+    setCookie(null, "usuario_id", response_body.user.cliente_id, {
+      maxAge: 30 * 24 * 60 * 60,
+      path: "/",
+      sameSite: "Strict"
+    });
+
+    setCookie(null, "token", response_body.token, {
+      maxAge: 30 * 24 * 60 * 60,
+      path: "/",
+      sameSite: "Strict"
+    });
+
+    return router.push("/dashboard");
+    
+  }
   return (
     <div className="container relative flex flex-col items-center h-[100vh]">
       <div className="relative flex flex-col items-center top-[100px]">
@@ -59,10 +83,11 @@ export default function Login(props: any) {
             placeholder="Ex: email@email.com"
             ref={emailRef}
           />
-          <label htmlFor="password">Password</label>
+          <label htmlFor="password">Senha</label>
           <input
             className="rounded-md bg-slate-100 h-[40px] pl-4"
             type="password"
+            placeholder="*******"
             ref={passwordRef}
           />
           <div>
@@ -80,10 +105,19 @@ export default function Login(props: any) {
   );
 }
 
-export async function getStaticProps(context: any) {
+export async function getServerSideProps(context: any) {
+  const { token } = parseCookies(context);
+
+  if (token) { 
+    return {
+      redirect: {
+        destination: "/dashboard",
+        permanent: false
+      }
+    }
+  }
+  
   return {
-    props: {
-      env_api_secret: process.env.API_SECRET,
-    },
+    props: {},
   };
 }

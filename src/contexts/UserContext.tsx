@@ -1,17 +1,36 @@
-import { createContext, useState } from "react";
+import { createContext, useEffect, useState } from "react";
+import { parseCookies } from "nookies";
+import { useUser } from "../hooks/useRehydrate";
 
-type userContextType = {
-  isAuthenticated: boolean;
+export type UserContextType = {
+  isLogged: boolean;
+  user: string[];
 };
 
-export const userContext = createContext({} as userContextType);
+export const UserContext = createContext({});
 
-export default function AuthProvider({ chidren }: any) {
-  const isAuthenticated = false;
+export default function UserContextProvider({ children }: any) {
+  const { token } = parseCookies();
+
+  let isLogged = !!token;
+
+  const [user, setUser] = useState<UserContextType | null>({
+    isLogged: isLogged,
+    user: [],
+  });
+
+  useEffect(() => {
+    useUser().then((response) => {
+      setUser({
+        isLogged: true,
+        user: response.data
+      })
+    });
+  }, [token]);
 
   return (
-    <userContext.Provider value={isAuthenticated}>
-      {chidren}
-    </userContext.Provider>
+    <UserContext.Provider value={{ user, setUser }}>
+      {children}
+    </UserContext.Provider>
   );
 }
