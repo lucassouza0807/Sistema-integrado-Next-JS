@@ -1,6 +1,6 @@
 import { createContext, useEffect, useState } from "react";
 import { parseCookies } from "nookies";
-import { useUser } from "../hooks/useRehydrate";
+import { useUser } from "../hooks/useUser";
 
 export type UserContextType = {
   isLogged: boolean;
@@ -20,12 +20,16 @@ export default function UserContextProvider({ children }: any) {
   });
 
   useEffect(() => {
-    useUser().then((response) => {
-      setUser({
-        isLogged: true,
-        user: response.data
+    useUser()
+      .then((response) => {
+        setUser({
+          isLogged: true,
+          user: response.data,
+        });
       })
-    });
+      .catch((error) => {
+        console.log(error);
+      });
   }, [token]);
 
   return (

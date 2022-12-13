@@ -1,10 +1,7 @@
 import { parseCookies } from "nookies";
-import Header from "../components/Header";
 import { useContext, createContext, useState, useEffect } from "react";
 import { UserContext } from "../src/contexts/UserContext";
-import Image from "next/image";
-import Link from 'next/link'
-import { useRehydrate } from "../src/hooks/useRehydrate";
+import { useUser } from "../src/hooks/useUser";
 
 export default function Dashboard({ ...props }: any) {
   const { user, setUser }: any = useContext(UserContext);

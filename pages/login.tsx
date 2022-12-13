@@ -2,6 +2,7 @@ import { useState, useEffect, useRef, useContext } from "react";
 import { useRouter } from "next/router";
 import { UserContext } from "../src/contexts/UserContext";
 import { setCookie, parseCookies } from "nookies";
+import { api_helper } from "../src/helpers/api_helper";
 
 export default function Login(props: any) {
   const emailRef: any = useRef("");
@@ -20,46 +21,39 @@ export default function Login(props: any) {
     const email = emailRef.current.value;
     const password = passwordRef.current.value;
 
-    const response = await fetch("http://127.0.0.1:8000/api/v1/login", {
-      method: "POST",
-      body: JSON.stringify({
+    api_helper
+      .post("/login", {
         email: email,
         password: password,
-      }),
-      headers: {
-        "Content-Type": "application/json",
-        api_secret: process.env.NEXT_PUBLIC_API_SECRET,
-      },
-    });
+      })
+      .then((response) => {
+        if (response.data.success == false) {
+          /* Se caso retornar success = false */
+          console.log(response);
+          error_div.current.style.display = "flex";
+          setValidationError((prevState: any) => response.data.message);
+          return router.push("/login");
+        }
 
-    const response_body = await response.json();
+        setUser({
+          isLogged: true,
+          user: response.data.user,
+        });
 
-    if (response_body.success == false) {
-      error_div.current.style.display = "flex";
-      setValidationError((prevState: any) => response_body.message);
-      return router.push("/login");
-    }
+        setCookie(null, "usuario_id", response.data.user.cliente_id, {
+          maxAge: 30 * 24 * 60 * 60,
+          path: "/",
+          sameSite: "Strict",
+        });
 
-    setUser({
-      isLogged: true,
-      user: response_body.user,
-    });
+        setCookie(null, "token", response.data.token, {
+          maxAge: 30 * 24 * 60 * 60,
+          path: "/",
+          sameSite: "Strict",
+        });
 
-    
-    setCookie(null, "usuario_id", response_body.user.cliente_id, {
-      maxAge: 30 * 24 * 60 * 60,
-      path: "/",
-      sameSite: "Strict"
-    });
-
-    setCookie(null, "token", response_body.token, {
-      maxAge: 30 * 24 * 60 * 60,
-      path: "/",
-      sameSite: "Strict"
-    });
-
-    return router.push("/dashboard");
-    
+        return router.push("/dashboard");
+      });
   }
   return (
     <div className="container relative flex flex-col items-center h-[100vh]">
@@ -108,15 +102,15 @@ export default function Login(props: any) {
 export async function getServerSideProps(context: any) {
   const { token } = parseCookies(context);
 
-  if (token) { 
+  if (token) {
     return {
       redirect: {
         destination: "/dashboard",
-        permanent: false
-      }
-    }
+        permanent: false,
+      },
+    };
   }
-  
+
   return {
     props: {},
   };
