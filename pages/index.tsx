@@ -1,13 +1,15 @@
 import { UserContext } from "../src/contexts/UserContext";
-import { useContext } from "react";
+import { useContext, useEffect } from "react";
+import { destroyCookie, parseCookies } from "nookies";
+import { useRouter } from "next/router";
+import Link from "next/link";
 
-export default function Home() {
-  const { user } : any = useContext(UserContext);
-  console.log(user);
+export default function Home({...props}) {
+
+  //const data = useFetch("http://localhost:8000/api/v1/user/3");
+
+  //console.log(data);
+
+  return <>Lucas</>
   
-  return (
-    <>
-      <h1 className="bg-slate-100 relative top-[300px]">LdUCAS</h1>
-    </>
-  );
 }

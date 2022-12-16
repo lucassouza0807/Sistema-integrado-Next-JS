@@ -28,7 +28,7 @@ export default function UserContextProvider({ children }: any) {
         });
       })
       .catch((error) => {
-        console.log(error);
+        //console.log(error);
       });
   }, [token]);
 

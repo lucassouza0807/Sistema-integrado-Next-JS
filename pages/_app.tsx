@@ -1,15 +1,15 @@
 import "../styles/globals.css";
-import type { AppProps } from "next/app";
 import UserContextProvider, { UserContext } from "../src/contexts/UserContext";
-import { useContext } from "react";
-import Header from "../components/Header";
+import ThemeProvider from "../src/contexts/UserTheme";
+import Header from "./components/Header";
 
-export default function App({ session, Component, pageProps }: any) {
-  
+export default function App({ Component, pageProps }: AppProps) {
   return (
-    <UserContextProvider>
-      <Header />
-      <Component {...pageProps} />
-    </UserContextProvider>
+    <ThemeProvider>
+      <UserContextProvider>
+        <Header />
+        <Component {...pageProps} />
+      </UserContextProvider>
+    </ThemeProvider>
   );
 }
